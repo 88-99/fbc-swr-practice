@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useSWR from "swr";
 import "./App.css";
 
 function App() {
@@ -7,11 +8,15 @@ function App() {
 
   const [status, setStatus] = useState("");
 
-  fetch(url, { headers })
-    .then((res) => res.json())
-    .then((json) => setStatus(json.description));
+  const fetcher = () =>
+    fetch(url, { headers })
+      .then((res) => res.json())
+      .then((json) => setStatus(json.description));
 
-  return <>{status && <p>Status : {status}</p>}</>;
+  const { error, isLoading } = useSWR("/api/sleep=2000", fetcher);
+  if (error) return <div className="status">failed to load</div>;
+  if (isLoading) return <div className="status">loading...</div>;
+  return <div className="status">{status && <p>Status : {status}</p>}</div>;
 }
 
 export default App;
